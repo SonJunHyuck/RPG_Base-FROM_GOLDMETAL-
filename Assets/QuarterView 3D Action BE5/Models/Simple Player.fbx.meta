@@ -98,7 +98,28 @@ ModelImporter:
       mirror: 0
       bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
       curves: []
-      events: []
+      events:
+      - time: 0.45368752
+        functionName: OnSwingAttackEvent
+        data: 
+        objectReferenceParameter: {fileID: 11500000, guid: 80d1a24a74963e548b21d8d210fb9af8, type: 3}
+        floatParameter: 0
+        intParameter: 0
+        messageOptions: 0
+      - time: 0.6115258
+        functionName: OnSwingAttackEndEvent
+        data: 
+        objectReferenceParameter: {fileID: 11500000, guid: 80d1a24a74963e548b21d8d210fb9af8, type: 3}
+        floatParameter: 0
+        intParameter: 0
+        messageOptions: 0
+      - time: 0.92149127
+        functionName: OnSwingEndEvent
+        data: 
+        objectReferenceParameter: {fileID: 11500000, guid: 80d1a24a74963e548b21d8d210fb9af8, type: 3}
+        floatParameter: 0
+        intParameter: 0
+        messageOptions: 0
       transformMask: []
       maskType: 3
       maskSource: {instanceID: 0}
@@ -366,7 +387,14 @@ ModelImporter:
       mirror: 0
       bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
       curves: []
-      events: []
+      events:
+      - time: 0.92957747
+        functionName: OnSwapEndEvent
+        data: 
+        objectReferenceParameter: {fileID: 11500000, guid: 80d1a24a74963e548b21d8d210fb9af8, type: 3}
+        floatParameter: 0
+        intParameter: 0
+        messageOptions: 0
       transformMask: []
       maskType: 3
       maskSource: {instanceID: 0}
@@ -496,7 +524,7 @@ ModelImporter:
   autoGenerateAvatarMappingIfUnspecified: 1
   animationType: 2
   humanoidOversampling: 1
-  avatarSetup: 0
+  avatarSetup: 1
   addHumanoidExtraRootOnlyWhenUsingAvatar: 0
   importBlendShapeDeformPercent: 0
   remapMaterialsIfMaterialImportModeIsNone: 1

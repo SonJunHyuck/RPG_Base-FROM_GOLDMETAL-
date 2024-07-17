@@ -6,7 +6,7 @@ public class Item : MonoBehaviour
 {
     public enum Type
     {
-        Ammo, Coin, Greade, Heart, Weapon
+        Ammo, Coin, Grenade, Heart, Weapon
     };
 
     public Type type;
@@ -39,5 +39,10 @@ public class Item : MonoBehaviour
         Vector3 hoverDir = isUp ? Vector3.up : Vector3.down;
 
         meshObject.Translate(hoverDir * Time.deltaTime);
+    }
+
+    public void Disappear()
+    {
+        Destroy(gameObject);
     }
 }
