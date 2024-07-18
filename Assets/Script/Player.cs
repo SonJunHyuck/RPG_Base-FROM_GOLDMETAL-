@@ -64,6 +64,14 @@ public class Player : MonoBehaviour
     private bool isSwap;
     private bool isReload;
 
+    public bool IsBorder
+    {
+        get
+        {
+            return Physics.Raycast(transform.position, transform.forward, 5, LayerMask.GetMask("Wall"));
+        }
+    }
+
     private bool IsMoving
     {
         get { return moveVec != Vector3.zero; }
@@ -160,7 +168,11 @@ public class Player : MonoBehaviour
 
     private void Move()
     {
-        rigid.position += Speed * Time.deltaTime * moveVec;
+        if(!IsBorder)
+        {
+            rigid.position += Speed * Time.deltaTime * moveVec;
+        }
+        
 
         // .. Move의 연장선
         animator.SetBool("isRun", IsMoving);
@@ -179,13 +191,16 @@ public class Player : MonoBehaviour
 
         if(isAttackKeyDown)
         {
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            RaycastHit hit;
-            if (Physics.Raycast(ray, out hit, 100))
+            if (!isJump && !isDodge && !isSwap && !isReload && canAttack)
             {
-                Vector3 lookDir = hit.point - transform.position;
-                
-                transform.LookAt(hit.point);
+                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                RaycastHit hit;
+                if (Physics.Raycast(ray, out hit, 100))
+                {
+                    Vector3 lookDir = hit.point - transform.position;
+
+                    transform.LookAt(hit.point);
+                }
             }
         }
         else
@@ -226,7 +241,7 @@ public class Player : MonoBehaviour
             yield break;
 
         canAttack = false;
-        yield return new WaitForSeconds(equipWeapon.AttackCooltime);
+        yield return new WaitForSeconds(equipWeapon.AttackCooltime / AttackSpeed);
         canAttack = true;
     }
 
@@ -267,7 +282,7 @@ public class Player : MonoBehaviour
 
     private void Dodge()
     {
-        if (isJumpKeyDown && IsMoving && !isJump && !isDodge)
+        if (isJumpKeyDown && IsMoving && !isJump && !isDodge && !isReload)
         {
             dodgeVec = moveVec;
             animator.SetTrigger("doDodge");
