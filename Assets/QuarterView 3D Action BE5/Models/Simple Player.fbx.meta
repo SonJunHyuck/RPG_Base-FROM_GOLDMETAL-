@@ -148,7 +148,14 @@ ModelImporter:
       mirror: 0
       bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
       curves: []
-      events: []
+      events:
+      - time: 0.07605634
+        functionName: OnShotAttackEvent
+        data: 
+        objectReferenceParameter: {fileID: 11500000, guid: 80d1a24a74963e548b21d8d210fb9af8, type: 3}
+        floatParameter: 0
+        intParameter: 0
+        messageOptions: 0
       transformMask: []
       maskType: 3
       maskSource: {instanceID: 0}
@@ -329,7 +336,14 @@ ModelImporter:
       mirror: 0
       bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
       curves: []
-      events: []
+      events:
+      - time: 0.9211267
+        functionName: OnReloadEndEvent
+        data: 
+        objectReferenceParameter: {fileID: 11500000, guid: 80d1a24a74963e548b21d8d210fb9af8, type: 3}
+        floatParameter: 0
+        intParameter: 0
+        messageOptions: 0
       transformMask: []
       maskType: 3
       maskSource: {instanceID: 0}

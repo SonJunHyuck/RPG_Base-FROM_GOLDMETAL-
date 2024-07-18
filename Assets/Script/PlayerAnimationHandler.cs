@@ -39,6 +39,7 @@ public class PlayerAnimationHandler : MonoBehaviour
     {
         Debug.Log("SwapEndEvent");
         player.SwapOff();
+        weapon = transform.root.GetComponentInChildren<Weapon>();
     }
     #endregion
 
@@ -59,4 +60,14 @@ public class PlayerAnimationHandler : MonoBehaviour
         GetWeapon.EndSwing();
     }
     #endregion
+
+    private void OnShotAttackEvent()
+    {
+        GetWeapon.ShotAttack();
+    }
+
+    private void OnReloadEndEvent()
+    {
+        player.ReloadOff();
+    }
 }

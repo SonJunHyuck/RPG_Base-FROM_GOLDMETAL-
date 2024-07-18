@@ -57,11 +57,12 @@ public class Player : MonoBehaviour
     private bool isSwapKeyDown2;
     private bool isSwapKeyDown3;
     private bool isAttackKeyDown;
+    private bool isReloadKeyDown;
 
     private bool isJump;
     private bool isDodge;
     private bool isSwap;
-    private bool isAttack;
+    private bool isReload;
 
     private bool IsMoving
     {
@@ -77,6 +78,14 @@ public class Player : MonoBehaviour
     private GameObject nearObject;
     private Weapon equipWeapon;
     private int equipWeaponIndex;
+    public bool IsEquip
+    {
+        get 
+        {
+            Debug.Log("EquipWeapon is null");
+            return equipWeapon != null;
+        }
+    }
 
     private float attackSpeed;
     public float AttackSpeed
@@ -91,6 +100,9 @@ public class Player : MonoBehaviour
             animator.SetFloat("AttackSpeed", value);
         }
     }
+    private bool canAttack;
+
+    Dictionary<Weapon.Type, string> attackAnimationKeyDic;
 
     private void Awake()
     {
@@ -99,7 +111,16 @@ public class Player : MonoBehaviour
         animator = GetComponentInChildren<Animator>();
         rigid = GetComponent<Rigidbody>();
 
-        AttackSpeed = 1.5f;
+        AttackSpeed = 1.0f;
+        canAttack = true;
+        isJump = false;
+        isDodge = false;
+        isSwap = false;
+        isReload = false;
+
+        attackAnimationKeyDic = new Dictionary<Weapon.Type, string>();
+        attackAnimationKeyDic.Add(Weapon.Type.Melee, "doSwing");
+        attackAnimationKeyDic.Add(Weapon.Type.Range, "doShot");
     }
 
     void Update()
@@ -114,6 +135,7 @@ public class Player : MonoBehaviour
         Turn();
         Jump();
         Attack();
+        Reload();
         Dodge();
         Interaction();
         Swap();
@@ -128,7 +150,8 @@ public class Player : MonoBehaviour
         axisV = Input.GetAxisRaw("Vertical");
         isWalkKeyDown = Input.GetButton("Walk");
         isJumpKeyDown = Input.GetButtonDown("Jump");
-        isAttackKeyDown = Input.GetButtonDown("Fire1");
+        isAttackKeyDown = Input.GetButton("Fire1");
+        isReloadKeyDown = Input.GetButtonDown("Reload");
         isAquireKeyDown = Input.GetButtonDown("Interaction");
         isSwapKeyDown1 = Input.GetButtonDown("Swap1");
         isSwapKeyDown2 = Input.GetButtonDown("Swap2");
@@ -151,8 +174,25 @@ public class Player : MonoBehaviour
 
         // 회전은 캐릭터만 -> 카메라의 회전에 영향 x
         // 캐릭터가 -90도로 누워있기 때문에 up Vector로 보정
-        Quaternion lookDir = Quaternion.LookRotation(moveVec);
-        rigid.rotation = Quaternion.Slerp(rigid.rotation, lookDir, Time.deltaTime * 5.0f);
+        //Quaternion lookDir = Quaternion.LookRotation(moveVec);
+        //rigid.rotation = Quaternion.Slerp(rigid.rotation, lookDir, Time.deltaTime * 5.0f);
+
+        if(isAttackKeyDown)
+        {
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            RaycastHit hit;
+            if (Physics.Raycast(ray, out hit, 100))
+            {
+                Vector3 lookDir = hit.point - transform.position;
+                
+                transform.LookAt(hit.point);
+            }
+        }
+        else
+        {
+            transform.LookAt(transform.position + moveVec);
+        }
+        
     }
 
     private void Jump()
@@ -169,16 +209,60 @@ public class Player : MonoBehaviour
 
     private void Attack()
     {
-        if (equipWeapon == null)
+        if (!IsEquip)
             return;
-        Debug.Log("Attack");
 
-        if (isAttackKeyDown && equipWeapon.CanAttack && !isDodge && !isSwap)
+        if (isAttackKeyDown && canAttack && !isDodge && !isSwap && equipWeapon.CanAttack && !isReload)
         {
-            equipWeapon.Use();
-            animator.SetTrigger("doSwing");
+            // dictionary<type, string> 사용
+            animator.SetTrigger(attackAnimationKeyDic[equipWeapon.type]);
+            StartCoroutine(AttackDelay());
+        }
+    }
+
+    private IEnumerator AttackDelay()
+    {
+        if (!IsEquip)
+            yield break;
+
+        canAttack = false;
+        yield return new WaitForSeconds(equipWeapon.AttackCooltime);
+        canAttack = true;
+    }
+
+    private void Reload()
+    {
+        if (!isReloadKeyDown)
+            return;
+
+        if (!IsEquip)
+        {
+            Debug.Log("EquipWeapon is null");
+            return;
         }
 
+        if (equipWeapon.type == Weapon.Type.Melee)
+        {
+            Debug.Log("You have equiped melee type weapon now");
+            return;
+        }
+
+        if (ammo == 0)
+        {
+            Debug.Log("You not enough ammo");
+            return;
+        }
+
+        if(!isReload && !isDodge && !isSwap && canAttack)
+        {
+            isReload = true;
+            animator.SetTrigger("doReload");
+        }
+    }
+    public void ReloadOff()
+    {
+        ammo = equipWeapon.Reload(ammo);
+        isReload = false;
     }
 
     private void Dodge()
@@ -266,8 +350,6 @@ public class Player : MonoBehaviour
         equipWeapon = weapons[weaponIndex].GetComponent<Weapon>();
         equipWeaponIndex = weaponIndex;
         weapons[weaponIndex].SetActive(true);
-        //animator.SetFloat("AttackSpeed", attackSpeed);  // 공격속도가 변하면 같이 변해야함
-
 
         animator.SetTrigger("doSwap");
         isSwap = true;
