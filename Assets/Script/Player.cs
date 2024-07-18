@@ -35,6 +35,7 @@ public class Player : MonoBehaviour
     public GameObject[] weapons;
     public bool[] hasWeapon;
     public GameObject[] grenades;
+    public GameObject grenadePrefab;
     public int hasGrenade;
 
     public int ammo;
@@ -58,11 +59,13 @@ public class Player : MonoBehaviour
     private bool isSwapKeyDown3;
     private bool isAttackKeyDown;
     private bool isReloadKeyDown;
+    private bool isGrenadeKeyDown;
 
     private bool isJump;
     private bool isDodge;
     private bool isSwap;
     private bool isReload;
+    private bool isDamage;
 
     public bool IsBorder
     {
@@ -82,6 +85,7 @@ public class Player : MonoBehaviour
 
     private Animator animator;
     private Rigidbody rigid;
+    private MeshRenderer[] meshRenderers;
 
     private GameObject nearObject;
     private Weapon equipWeapon;
@@ -90,7 +94,11 @@ public class Player : MonoBehaviour
     {
         get 
         {
-            Debug.Log("EquipWeapon is null");
+            if(equipWeapon == null)
+            {
+                Debug.Log("EquipWeapon is null");
+            }
+
             return equipWeapon != null;
         }
     }
@@ -118,6 +126,7 @@ public class Player : MonoBehaviour
 
         animator = GetComponentInChildren<Animator>();
         rigid = GetComponent<Rigidbody>();
+        meshRenderers = GetComponentsInChildren<MeshRenderer>();
 
         AttackSpeed = 1.0f;
         canAttack = true;
@@ -125,6 +134,7 @@ public class Player : MonoBehaviour
         isDodge = false;
         isSwap = false;
         isReload = false;
+        isDamage = false;
 
         attackAnimationKeyDic = new Dictionary<Weapon.Type, string>();
         attackAnimationKeyDic.Add(Weapon.Type.Melee, "doSwing");
@@ -143,6 +153,7 @@ public class Player : MonoBehaviour
         Turn();
         Jump();
         Attack();
+        ThrowGrenade();
         Reload();
         Dodge();
         Interaction();
@@ -159,6 +170,7 @@ public class Player : MonoBehaviour
         isWalkKeyDown = Input.GetButton("Walk");
         isJumpKeyDown = Input.GetButtonDown("Jump");
         isAttackKeyDown = Input.GetButton("Fire1");
+        isGrenadeKeyDown = Input.GetButtonDown("Fire2");
         isReloadKeyDown = Input.GetButtonDown("Reload");
         isAquireKeyDown = Input.GetButtonDown("Interaction");
         isSwapKeyDown1 = Input.GetButtonDown("Swap1");
@@ -181,7 +193,7 @@ public class Player : MonoBehaviour
 
     private void Turn()
     {
-        if (!IsMoving)
+        if (!IsMoving || isDodge || !canAttack)
             return;
 
         // 회전은 캐릭터만 -> 카메라의 회전에 영향 x
@@ -189,25 +201,20 @@ public class Player : MonoBehaviour
         //Quaternion lookDir = Quaternion.LookRotation(moveVec);
         //rigid.rotation = Quaternion.Slerp(rigid.rotation, lookDir, Time.deltaTime * 5.0f);
 
-        if(isAttackKeyDown)
-        {
-            if (!isJump && !isDodge && !isSwap && !isReload && canAttack)
-            {
-                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-                RaycastHit hit;
-                if (Physics.Raycast(ray, out hit, 100))
-                {
-                    Vector3 lookDir = hit.point - transform.position;
+        transform.LookAt(transform.position + moveVec);
+    }
 
-                    transform.LookAt(hit.point);
-                }
-            }
-        }
-        else
+    private void TurnTargeting()
+    {
+        // 공격방향으로 회전
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        RaycastHit hit;
+        if (Physics.Raycast(ray, out hit, 100))
         {
-            transform.LookAt(transform.position + moveVec);
+            Vector3 lookDir = hit.point - transform.position;
+            lookDir.y = 0;
+            transform.LookAt(transform.position + lookDir);
         }
-        
     }
 
     private void Jump()
@@ -224,14 +231,20 @@ public class Player : MonoBehaviour
 
     private void Attack()
     {
+        if (!isAttackKeyDown)
+            return;
+
         if (!IsEquip)
             return;
 
-        if (isAttackKeyDown && canAttack && !isDodge && !isSwap && equipWeapon.CanAttack && !isReload)
+        if (canAttack && !isDodge && !isSwap && equipWeapon.CanAttack && !isReload)
         {
+            TurnTargeting();
+
             // dictionary<type, string> 사용
             animator.SetTrigger(attackAnimationKeyDic[equipWeapon.type]);
             StartCoroutine(AttackDelay());
+            equipWeapon.Use();
         }
     }
 
@@ -241,8 +254,33 @@ public class Player : MonoBehaviour
             yield break;
 
         canAttack = false;
-        yield return new WaitForSeconds(equipWeapon.AttackCooltime / AttackSpeed);
+        yield return new WaitForSeconds(equipWeapon.AttackCooltime);
         canAttack = true;
+    }
+
+    private void ThrowGrenade()
+    {
+        if (hasGrenade == 0)
+            return;
+
+        if(isGrenadeKeyDown && !isReload && !isSwap)
+        {
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            RaycastHit hit;
+            if (Physics.Raycast(ray, out hit, 100))
+            {
+                Vector3 lookDir = hit.point - transform.position;
+                lookDir.y = 15;
+
+                GameObject instantGrenade = Instantiate(grenadePrefab, transform.position, transform.rotation);
+                Rigidbody rigidGrenade = instantGrenade.GetComponent<Rigidbody>();
+                rigidGrenade.AddForce(lookDir, ForceMode.Impulse);
+                rigidGrenade.AddTorque(Vector3.back * 10, ForceMode.Impulse);
+
+                hasGrenade--;
+                grenades[hasGrenade].SetActive(false);
+            }
+        }
     }
 
     private void Reload()
@@ -282,7 +320,7 @@ public class Player : MonoBehaviour
 
     private void Dodge()
     {
-        if (isJumpKeyDown && IsMoving && !isJump && !isDodge && !isReload)
+        if (isJumpKeyDown && IsMoving && !isJump && !isDodge && !isReload && canAttack)
         {
             dodgeVec = moveVec;
             animator.SetTrigger("doDodge");
@@ -372,6 +410,7 @@ public class Player : MonoBehaviour
 
     public void SwapOff()
     {
+        AttackSpeed = equipWeapon.attackSpeed;
         isSwap = false;
     }
 
@@ -415,7 +454,42 @@ public class Player : MonoBehaviour
 
             item.Disappear();
         }
+        else if(other.CompareTag("EnemyBullet"))
+        {
+            // 무적시간
+            if(!isDamage)
+            {
+                Bullet enemyBullet = other.GetComponent<Bullet>();
+                health -= enemyBullet.damage;
+
+                StartCoroutine(OnDamage());
+            }
+
+            if (other.GetComponent<Rigidbody>() != null)
+            {
+                Destroy(other.gameObject);
+            }
+        }
         
+    }
+
+    IEnumerator OnDamage()
+    {
+        isDamage = true;
+
+        foreach(MeshRenderer meshRenderer in meshRenderers)
+        {
+            meshRenderer.material.color = Color.yellow;
+        }
+
+        yield return new WaitForSeconds(0.5f);  // 무적시간
+
+        isDamage = false;
+
+        foreach (MeshRenderer meshRenderer in meshRenderers)
+        {
+            meshRenderer.material.color = Color.white;
+        }
     }
 
     private void OnTriggerStay(Collider other)

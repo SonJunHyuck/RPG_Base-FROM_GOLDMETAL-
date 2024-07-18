@@ -35,7 +35,7 @@ public class Weapon : MonoBehaviour
     {
         get 
         {
-            if(type == Type.Melee)
+            if(type == Type.Melee && !isSwing)
             {
                 return true;
             }
@@ -46,6 +46,8 @@ public class Weapon : MonoBehaviour
             return false;
         }
     }
+
+    public bool isSwing;
 
     private BoxCollider meleeArea;
     private TrailRenderer trailRenderer;
@@ -61,6 +63,7 @@ public class Weapon : MonoBehaviour
         trailRenderer = GetComponentInChildren<TrailRenderer>();
 
         //canAttack = true;
+        isSwing = false;
     }
 
     public void Use()
@@ -69,7 +72,10 @@ public class Weapon : MonoBehaviour
         //    return;
 
         //canAttack = false;
-
+        if(type == Type.Melee)
+        {
+            isSwing = true;
+        }
     }
 
     public void SwingAttack()
@@ -86,7 +92,7 @@ public class Weapon : MonoBehaviour
     public void EndSwing()
     {
         trailRenderer.enabled = false;
-        //canAttack = true;
+        isSwing = false; 
     }
 
     public void ShotAttack()
@@ -104,7 +110,6 @@ public class Weapon : MonoBehaviour
         bulletCaseRigid.AddTorque(Vector3.up * 10, ForceMode.Impulse);
 
         curAmmo--;
-        //canAttack = true;
     }
 
     public int Reload(int inAmmo)
