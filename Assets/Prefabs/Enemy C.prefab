@@ -656,7 +656,7 @@ Rigidbody:
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 94
+  m_Constraints: 80
   m_CollisionDetection: 0
 --- !u!65 &1470666975623250279
 BoxCollider:
@@ -677,8 +677,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 3, y: 3, z: 3}
-  m_Center: {x: 0, y: 1.53, z: 0}
+  m_Size: {x: 3, y: 6, z: 3}
+  m_Center: {x: 0, y: 3.13, z: 0}
 --- !u!195 &4546858793004661956
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -714,10 +714,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   type: 2
+  gameManager: {fileID: 0}
   maxHealth: 200
+  curHealth: 0
+  score: 200
   target: {fileID: 0}
   meleeArea: {fileID: 0}
   bullet: {fileID: 6076678952218655708, guid: f6a8c3e97320e46438473f4d43a705f6, type: 3}
+  coins:
+  - {fileID: 2848470296141019402, guid: e2179260d41bf9c4fbc73e753bcbb427, type: 3}
+  - {fileID: 2723872210098014963, guid: 2c3890528d0bc3844a3c73c7028296a3, type: 3}
+  - {fileID: 1888635512419341386, guid: 005d51947e9b2ea498d543414e3d1ab4, type: 3}
 --- !u!1 &8929625569989434496
 GameObject:
   m_ObjectHideFlags: 0

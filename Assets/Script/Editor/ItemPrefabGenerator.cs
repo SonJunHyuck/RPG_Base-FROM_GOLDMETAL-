@@ -5,16 +5,16 @@ using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
 using UnityEngine.UI;
-
+#if UNIUTY_EDITOR
 public class ItemPrefabGenerator : EditorWindow
 {
-    // °ÔÀÓ¿ÀºêÁ§Æ®¸¦ ¸®½ºÆ®·Î ¹Ş±â À§ÇØ
+    // ê²Œì„ì˜¤ë¸Œì íŠ¸ë¥¼ ë¦¬ìŠ¤íŠ¸ë¡œ ë°›ê¸° ìœ„í•´
     public GameObject[] Items;
     ScriptableObject scriptableObj;
     SerializedObject serialObj;
     SerializedProperty serialProp;
 
-    // ÀÌÆåÆ®·Î ³Ö¾îÁÙ ÇÁ¸®Æé
+    // ì´í™íŠ¸ë¡œ ë„£ì–´ì¤„ í”„ë¦¬í©
     private Object Light;
     private Object Particle;
 
@@ -26,7 +26,7 @@ public class ItemPrefabGenerator : EditorWindow
 
     private void OnEnable()
     {
-        // ¸®½ºÆ® ÃÊ±â ÀÛ¾÷
+        // ë¦¬ìŠ¤íŠ¸ ì´ˆê¸° ì‘ì—…
         scriptableObj = this;
         serialObj = new SerializedObject(scriptableObj);
         serialProp = serialObj.FindProperty("Items");
@@ -34,16 +34,16 @@ public class ItemPrefabGenerator : EditorWindow
 
     private void OnGUI()
     {
-        // Ä¿½ºÅÒ ¿¡µğÅÍ¿¡¼­ ¸®½ºÆ®´Â ¼öÁ¤µÈ °ÍÀ» °è¼Ó ¾÷µ¥ÀÌÆ® ÇÏ´Â ¹æ¹ıÀ¸·Î º¸¿©ÁÜ
+        // ì»¤ìŠ¤í…€ ì—ë””í„°ì—ì„œ ë¦¬ìŠ¤íŠ¸ëŠ” ìˆ˜ì •ëœ ê²ƒì„ ê³„ì† ì—…ë°ì´íŠ¸ í•˜ëŠ” ë°©ë²•ìœ¼ë¡œ ë³´ì—¬ì¤Œ
         EditorGUILayout.PropertyField(serialProp, true);
         serialObj.ApplyModifiedProperties();
         serialObj.UpdateIfRequiredOrScript();
 
-        // ÇÊ¿äÇÑ ÇÁ¸®Æé ÁöÁ¤
+        // í•„ìš”í•œ í”„ë¦¬í© ì§€ì •
         Light = EditorGUILayout.ObjectField("Light", Light, typeof(GameObject), false);
         Particle = EditorGUILayout.ObjectField("Particle", Particle, typeof(GameObject), false);
 
-        // ¹öÆ° ´©¸£¸é ½ÇÇà
+        // ë²„íŠ¼ ëˆ„ë¥´ë©´ ì‹¤í–‰
         if(GUILayout.Button("Generate"))
         {
             Generate();
@@ -54,7 +54,7 @@ public class ItemPrefabGenerator : EditorWindow
     {
         foreach(GameObject item in Items)
         {
-            // RigidBody°¡ ÀÖ´Ù -> ÀÌ¹Ì ÇÑ¹ø Generate Çß´Ù -> ÇÊ¿äÇÑ ÀÛ¾÷¸¸ ÇÑ´Ù.
+            // RigidBodyê°€ ìˆë‹¤ -> ì´ë¯¸ í•œë²ˆ Generate í–ˆë‹¤ -> í•„ìš”í•œ ì‘ì—…ë§Œ í•œë‹¤.
             if(item.GetComponent<Rigidbody>() == null)
             {
                 item.AddComponent<Rigidbody>();
@@ -70,7 +70,7 @@ public class ItemPrefabGenerator : EditorWindow
                 item.AddComponent<Item>();
             }
             
-            // ¶óÀÌÆ® ´Ş¾ÆÁÖ±â
+            // ë¼ì´íŠ¸ ë‹¬ì•„ì£¼ê¸°
             Transform light = item.transform.Find("EffectLight");
             if (light == null)
             {
@@ -93,7 +93,7 @@ public class ItemPrefabGenerator : EditorWindow
                 particle.name = Particle.name;
             }
 
-            // ÆÄÆ¼Å¬ ´Ş¾ÆÁÖ±â
+            // íŒŒí‹°í´ ë‹¬ì•„ì£¼ê¸°
             particle.SetParent(item.transform);
             particle.localPosition = Vector3.zero;
             particle.localRotation = Quaternion.identity;
@@ -104,3 +104,5 @@ public class ItemPrefabGenerator : EditorWindow
     }
     
 }
+
+#endif

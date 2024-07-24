@@ -6,6 +6,8 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
+    public GameManager gameManager;
+
     [Header("Player Stat")]
     [SerializeField]
     private float speed;
@@ -41,6 +43,7 @@ public class Player : MonoBehaviour
     public int ammo;
     public int coin;
     public int health;
+    public int score;
 
     public int maxAmmo;
     public int maxCoin;
@@ -66,6 +69,11 @@ public class Player : MonoBehaviour
     private bool isSwap;
     private bool isReload;
     private bool isDamage;
+    private bool isShop;
+    private bool IsDead
+    {
+        get { return health <= 0; }
+    }
 
     public bool IsBorder
     {
@@ -87,8 +95,10 @@ public class Player : MonoBehaviour
     private Rigidbody rigid;
     private MeshRenderer[] meshRenderers;
 
+    [SerializeField]
     private GameObject nearObject;
-    private Weapon equipWeapon;
+
+    public Weapon equipWeapon;
     private int equipWeaponIndex;
     public bool IsEquip
     {
@@ -139,10 +149,15 @@ public class Player : MonoBehaviour
         attackAnimationKeyDic = new Dictionary<Weapon.Type, string>();
         attackAnimationKeyDic.Add(Weapon.Type.Melee, "doSwing");
         attackAnimationKeyDic.Add(Weapon.Type.Range, "doShot");
+
+        //PlayerPrefs.SetInt("MaxScore", 112500);
     }
 
     void Update()
     {
+        if (IsDead)
+            return;
+
         GetInput();
 
         moveVec = new Vector3(axisH, 0, axisV).normalized;
@@ -237,7 +252,7 @@ public class Player : MonoBehaviour
         if (!IsEquip)
             return;
 
-        if (canAttack && !isDodge && !isSwap && equipWeapon.CanAttack && !isReload)
+        if (canAttack && !isDodge && !isSwap && equipWeapon.CanAttack && !isReload && !isShop)
         {
             TurnTargeting();
 
@@ -345,6 +360,12 @@ public class Player : MonoBehaviour
 
                 nearObject = null;
                 item.Disappear();
+            }
+            else if(nearObject.CompareTag("Shop"))
+            {
+                isShop = true;
+                Shop shop = nearObject.GetComponent<Shop>();
+                shop.Enter(this);
             }
         }
     }
@@ -482,6 +503,9 @@ public class Player : MonoBehaviour
             meshRenderer.material.color = Color.yellow;
         }
 
+        if (IsDead)
+            OnDie();
+
         yield return new WaitForSeconds(0.5f);  // 무적시간
 
         isDamage = false;
@@ -492,9 +516,16 @@ public class Player : MonoBehaviour
         }
     }
 
+    void OnDie()
+    {
+        animator.SetTrigger("doDie");
+        gameManager.GameOver();
+    }
+
+
     private void OnTriggerStay(Collider other)
     {
-        if (other.CompareTag("Weapon"))
+        if (other.CompareTag("Weapon") || other.CompareTag("Shop"))
         {
             nearObject = other.gameObject;
         }
@@ -502,7 +533,23 @@ public class Player : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-        if (nearObject != null)
+        if(nearObject != null)
+        {
+            if (nearObject.CompareTag("Weapon"))
+            {
+                
+            }
+            else if (nearObject.CompareTag("Shop"))
+            {
+                Shop shop = other.GetComponent<Shop>();
+                if (shop != null)
+                {
+                    shop.Exit();
+                }
+            }
+
+            isShop = false;
             nearObject = null;
+        }
     }
 }

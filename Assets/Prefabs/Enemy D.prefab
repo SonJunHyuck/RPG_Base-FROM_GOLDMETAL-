@@ -123,9 +123,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   type: 3
   maxHealth: 100
+  curHealth: 0
+  score: 500
   target: {fileID: 0}
   meleeArea: {fileID: 6275775034882883206}
   bullet: {fileID: 7762893980571938336, guid: d38e9952d251a2f42bac8f2fb83010c5, type: 3}
+  coins:
+  - {fileID: 2848470296141019402, guid: e2179260d41bf9c4fbc73e753bcbb427, type: 3}
+  - {fileID: 1888635512419341386, guid: 005d51947e9b2ea498d543414e3d1ab4, type: 3}
+  - {fileID: 2723872210098014963, guid: 2c3890528d0bc3844a3c73c7028296a3, type: 3}
   missile: {fileID: 6495864794750370136, guid: d13527f1a18163045972e890598f2c16, type: 3}
   missilePortA: {fileID: 5880752821452958416}
   missilePortB: {fileID: 4029147827306055261}

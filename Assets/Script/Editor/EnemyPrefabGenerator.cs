@@ -5,6 +5,8 @@ using UnityEditor;
 using UnityEngine;
 using static UnityEngine.ParticleSystem;
 
+#if UNIUTY_EDITOR
+
 public class EnemyPrefabGenerator : EditorWindow
 {
     public Object fromObj;
@@ -45,3 +47,5 @@ public class EnemyPrefabGenerator : EditorWindow
         }
     }
 }
+
+#endif

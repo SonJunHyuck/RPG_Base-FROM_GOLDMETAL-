@@ -10,16 +10,20 @@ public class Enemy : MonoBehaviour
     public enum Type { A, B, C, D };
     public Type type;
 
-    public float maxHealth;
+    public GameManager gameManager;
 
-    [SerializeField]
-    protected float curHealth;
+    public float maxHealth;
+    public float curHealth;
+    public int score;
 
     public Transform target;
     public BoxCollider meleeArea;
     public GameObject bullet;
+    public GameObject[] coins;
+
     protected bool isChase;
     private bool isAttack;
+    
     
     public bool IsDead
     {
@@ -206,6 +210,27 @@ public class Enemy : MonoBehaviour
             gameObject.layer = 11;
 
             isChase = false;
+
+            Player player = target.GetComponent<Player>();
+            player.score += score;
+            int randomCoin = Random.Range(0, 3);
+            Instantiate(coins[randomCoin], transform.position, Quaternion.identity);
+
+            switch (type)
+            {
+                case Type.A:
+                    gameManager.enemyCntA--;
+                    break;
+                case Type.B:
+                    gameManager.enemyCntB--;
+                    break;
+                case Type.C:
+                    gameManager.enemyCntC--;
+                    break;
+                case Type.D:
+                    gameManager.enemyCntD--;
+                    break;
+            }
 
             navAgent.enabled = false;
             animator.SetTrigger("doDie");

@@ -9,10 +9,8 @@ public class Weapon : MonoBehaviour
     public Type type;
     public float damage;
 
-    [SerializeField]
-    private int maxAmmo;
-    [SerializeField]
-    private int curAmmo;
+    public int maxAmmo;
+    public int curAmmo;
 
     public float attackSpeed;
     public float AttackSpeed
